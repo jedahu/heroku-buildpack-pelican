@@ -3,8 +3,14 @@
 
 set -eo pipefail
 
-APACHE_VERSION="2.2.19"
-APACHE_PATH="apache"
+NGINX_VERSION="1.0.12"
+S3_BUCKET="jedatwork"
+
+NGINX_URL="http://${S3_BUCKET}.s3.amazonaws.com/blobs/nginx-${NGINX_VERSION}.tgz"
+NGINX_PATH="nginx"
+NGINX_VERSION=1.0.12
+#APACHE_VERSION="2.2.19"
+#APACHE_PATH="apache"
 COMPILE_PATH="www"
 BIN_DIR=$(cd $(dirname $0); pwd) # absolute path
 ROOT_DIR=$(dirname $BIN_DIR)
@@ -20,6 +26,17 @@ indent() {
   RE="s/^/       /"
   [ $(uname) == "Darwin" ] && sed -l "$RE" || sed -u "$RE"
 }
+
+if [ ! -d $NGINX_PATH ]; then
+    echo "-----> Bundling nginx v$NGINX_VERSION"
+    curl --silent --max-time 60 --location $NGINX_URL | tar xz
+fi
+# install apache if needed
+#if [ ! -d $APACHE_PATH ]; then
+#  APACHE_URL="https://s3.amazonaws.com/php-lp/apache-$APACHE_VERSION.tar.gz"
+#  echo "-----> Bundling Apache v$APACHE_VERSION"
+#  curl --silent --max-time 60 --location $APACHE_URL | tar xz
+#fi
 
 virtualenv() {
   python - "$@" <<EOF
@@ -39,12 +56,12 @@ for dir in $VIRTUALENV_DIRS; do
 done
 
 # unpack cache
-for DIR in $APACHE_PATH; do
-  rm -rf $DIR
-  if [ -d $CACHE_DIR/$DIR ]; then
-    cp -r $CACHE_DIR/$DIR $DIR
-  fi
-done
+#for DIR in $APACHE_PATH; do
+#  rm -rf $DIR
+#  if [ -d $CACHE_DIR/$DIR ]; then
+#    cp -r $CACHE_DIR/$DIR $DIR
+#  fi
+#done
 
 echo "-----> Preparing virtualenv version $(virtualenv --version)"
 virtualenv --no-site-packages . | indent
@@ -70,26 +87,24 @@ for dir in $VIRTUALENV_DIRS; do
   cp -R $dir $CACHE_DIR/
 done
 
-# install apache if needed
-if [ ! -d $APACHE_PATH ]; then
-  APACHE_URL="https://s3.amazonaws.com/php-lp/apache-$APACHE_VERSION.tar.gz"
-  echo "-----> Bundling Apache v$APACHE_VERSION"
-  curl --silent --max-time 60 --location $APACHE_URL | tar xz
-fi
-
 # update config files
-cp $LP_DIR/conf/httpd.conf $APACHE_PATH/conf
+#cp $LP_DIR/conf/httpd.conf $APACHE_PATH/conf
 
 cat >>boot.sh <<EOF
-sed -i 's/Listen 80/Listen '\$PORT'/' /app/apache/conf/httpd.conf
-touch /app/apache/logs/error_log
-touch /app/apache/logs/access_log
-tail -F /app/apache/logs/error_log &
-tail -F /app/apache/logs/access_log &
-ls /app/
-echo "Launching apache"
-exec /app/apache/bin/httpd -DNO_DETACH
+erb nginx.conf.erb > /app/nginx/conf/nginx.conf
+echo "Launching nginx"
+exec /app/nginx/bin/nginx
 EOF
+#cat >>boot.sh <<EOF
+#sed -i 's/Listen 80/Listen '\$PORT'/' /app/apache/conf/httpd.conf
+#touch /app/apache/logs/error_log
+#touch /app/apache/logs/access_log
+#tail -F /app/apache/logs/error_log &
+#tail -F /app/apache/logs/access_log &
+#ls /app/
+#echo "Launching apache"
+#exec /app/apache/bin/httpd -DNO_DETACH
+#EOF
 
 chmod +x boot.sh
 
@@ -108,8 +123,8 @@ else
 fi
 
 # repack cache
-mkdir -p $CACHE_DIR
-for DIR in $APACHE_PATH $COMPILE_PATH; do
-  rm -rf $CACHE_DIR/$DIR
-  cp -R $DIR $CACHE_DIR/$DIR
-done
+#mkdir -p $CACHE_DIR
+#for DIR in $APACHE_PATH $COMPILE_PATH; do
+#  rm -rf $CACHE_DIR/$DIR
+#  cp -R $DIR $CACHE_DIR/$DIR
+#done
