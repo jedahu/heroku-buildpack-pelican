@@ -7,8 +7,8 @@ NGINX_VERSION="1.0.12"
 S3_BUCKET="jedatwork"
 
 NGINX_URL="http://${S3_BUCKET}.s3.amazonaws.com/blobs/nginx-${NGINX_VERSION}.tgz"
-NGINX_PATH="nginx"
 NGINX_VERSION=1.0.12
+VENDORED_NGINX=$(mktemp -d -t nginx.XXXXXX)
 #APACHE_VERSION="2.2.19"
 #APACHE_PATH="apache"
 COMPILE_PATH="www"
@@ -27,9 +27,12 @@ indent() {
   [ $(uname) == "Darwin" ] && sed -l "$RE" || sed -u "$RE"
 }
 
-if [ ! -d $NGINX_PATH ]; then
+if [ ! -f "$BUILD_DIR/bin/nginx" ]; then
     echo "-----> Bundling nginx v$NGINX_VERSION"
-    curl --silent --max-time 60 --location $NGINX_URL | tar xz
+    #curl --silent --max-time 60 --location $NGINX_URL | tar xz
+    curl $NGINX_URL -s -o - | tar xzf - -C $VENDORED_NGINX
+    mkdir -p "$BUILD_DIR/bin"
+    cp "$VENDORED_NGINX/sbin/nginx" "$BUILD_DIR/bin/nginx"
 fi
 # install apache if needed
 #if [ ! -d $APACHE_PATH ]; then
@@ -91,9 +94,13 @@ done
 #cp $LP_DIR/conf/httpd.conf $APACHE_PATH/conf
 
 cat >>boot.sh <<EOF
-erb nginx.conf.erb > /app/nginx/conf/nginx.conf
+mkdir -p conf
+erb nginx.conf.erb > conf/nginx.conf
+mkdir -p logs
+touch logs/access.log logs/error.log
+(tail -qF -n 0 --pid=\$\$ logs/*.log &)
 echo "Launching nginx"
-exec /app/nginx/bin/nginx
+exec bin/nginx -p .
 EOF
 #cat >>boot.sh <<EOF
 #sed -i 's/Listen 80/Listen '\$PORT'/' /app/apache/conf/httpd.conf
