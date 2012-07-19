@@ -39,8 +39,7 @@ fi
 
 if [ ! -f "$BUILD_DIR/asciidoc" ]; then
     echo "-----> Bundling asciidoc v$ASCIIDOC_VERSION"
-    mkdir -p "$BUILD_DIR/asciidoc"
-    curl $ASCIIDOC_URL -s -o - | tar xzf - -C "$BUILD_DIR/asciidoc"
+    curl $ASCIIDOC_URL -s -o - | tar xzf -
 fi
 # install apache if needed
 #if [ ! -d $APACHE_PATH ]; then
@@ -129,7 +128,7 @@ mkdir -p $COMPILE_PATH
 # build the static site
 cd $BUILD_DIR
 
-PYTHONPATH="$BUILD_PATH/asciidoc"
+PYTHONPATH="$BUILD_PATH/asciidoc-${ASCIIDOC_VERSION}"
 if [ ! -d $BUILD_DIR/theme/templates ]; then
   echo "-----> Generating static content for deploy with default theme"
   bin/pelican $BUILD_DIR/src -s $BUILD_DIR/pelican.conf.py -o $COMPILE_PATH
