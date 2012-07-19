@@ -37,9 +37,9 @@ if [ ! -f "$BUILD_DIR/bin/nginx" ]; then
     cp "$VENDORED_NGINX/sbin/nginx" "$BUILD_DIR/bin/nginx"
 fi
 
-if [ ! -f "$BUILD_DIR/asciidoc" ]; then
+if [ ! -f "$BUILD_DIR/asciidoc-$ASCIIDOC_VERSION" ]; then
     echo "-----> Bundling asciidoc v$ASCIIDOC_VERSION"
-    curl $ASCIIDOC_URL -s -o - | tar xzf -
+    curl $ASCIIDOC_URL -s -o - | tar xzf - -C "$BUILD_DIR"
 fi
 # install apache if needed
 #if [ ! -d $APACHE_PATH ]; then
@@ -128,9 +128,9 @@ mkdir -p $COMPILE_PATH
 # build the static site
 cd $BUILD_DIR
 
-export PYTHONPATH="$BUILD_PATH/asciidoc-${ASCIIDOC_VERSION}"
+export PYTHONPATH="$BUILD_DIR/asciidoc-${ASCIIDOC_VERSION}"
 echo "-----> Generating static content for deploy"
-PYTHONPATH="asciidoc-${ASCIIDOC_VERSION}" bin/pelican $BUILD_DIR/src -s $BUILD_DIR/pelican.conf.py -o $COMPILE_PATH
+PYTHONPATH="$BUILD_DIR/asciidoc-${ASCIIDOC_VERSION}" bin/pelican $BUILD_DIR/src -s $BUILD_DIR/pelican.conf.py -o $COMPILE_PATH
 
 # repack cache
 #mkdir -p $CACHE_DIR
