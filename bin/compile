@@ -129,7 +129,7 @@ mkdir -p $COMPILE_PATH
 # build the static site
 cd $BUILD_DIR
 
-PYTHONPATH="$PYTHONPATH:$BUILD_PATH/asciidoc"
+PYTHONPATH="$BUILD_PATH/asciidoc"
 if [ ! -d $BUILD_DIR/theme/templates ]; then
   echo "-----> Generating static content for deploy with default theme"
   bin/pelican $BUILD_DIR/src -s $BUILD_DIR/pelican.conf.py -o $COMPILE_PATH
