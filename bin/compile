@@ -39,6 +39,7 @@ fi
 
 if [ ! -f "$BUILD_DIR/asciidoc" ]; then
     echo "-----> Bundling asciidoc v$ASCIIDOC_VERSION"
+    mkdir -p "$BUILD_DIR/asciidoc"
     curl $ASCIIDOC_URL -s -o - | tar xzf - -C "$BUILD_DIR/asciidoc"
 fi
 # install apache if needed
