@@ -135,7 +135,9 @@ cd $BUILD_DIR
 echo "-----> Generating static content for deploy"
 echo "       PYTHONPATH: $CACHE_DIR/asciidoc-${ASCIIDOC_VERSION}"
 echo "       " `ls "$CACHE_DIR/asciidoc-${ASCIIDOC_VERSION}"`
-PYTHONPATH="$CACHE_DIR/asciidoc-${ASCIIDOC_VERSION}" bin/pelican $BUILD_DIR/src -s $BUILD_DIR/pelican.conf.py -o $COMPILE_PATH
+PYTHONPATH="$CACHE_DIR/asciidoc-${ASCIIDOC_VERSION}" \
+  ASCIIDOC_PY="$CACHE_DIR/asciidoc-${ASCIIDOC_VERSION}/asciidoc.py" \
+  bin/pelican $BUILD_DIR/src -s $BUILD_DIR/pelican.conf.py -o $COMPILE_PATH
 
 # repack cache
 #mkdir -p $CACHE_DIR
