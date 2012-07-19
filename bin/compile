@@ -24,8 +24,6 @@ NAME=$($BIN_DIR/detect $BUILD_DIR)
 PIP_DOWNLOAD_CACHE=${PIP_DOWNLOAD_CACHE:-$CACHE_DIR/pip_downloads}
 VIRTUALENV_DIRS="bin include lib"
 
-rm -rf $CACHE_DIR
-
 indent() {
   RE="s/^/       /"
   [ $(uname) == "Darwin" ] && sed -l "$RE" || sed -u "$RE"
@@ -137,7 +135,8 @@ echo "       PYTHONPATH: $CACHE_DIR/asciidoc-${ASCIIDOC_VERSION}"
 echo "       " `ls "$CACHE_DIR/asciidoc-${ASCIIDOC_VERSION}"`
 PYTHONPATH="$CACHE_DIR/asciidoc-${ASCIIDOC_VERSION}" \
   ASCIIDOC_PY="$CACHE_DIR/asciidoc-${ASCIIDOC_VERSION}/asciidoc.py" \
-  bin/pelican $BUILD_DIR/src -s $BUILD_DIR/pelican.conf.py -o $COMPILE_PATH
+  PATH="$PATH:bin" \
+  pelican $BUILD_DIR/src -s $BUILD_DIR/pelican.conf.py -o $COMPILE_PATH
 
 # repack cache
 #mkdir -p $CACHE_DIR
