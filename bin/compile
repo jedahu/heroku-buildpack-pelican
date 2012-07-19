@@ -131,8 +131,6 @@ mkdir -p $COMPILE_PATH
 cd $BUILD_DIR
 
 echo "-----> Generating static content for deploy"
-echo "       PYTHONPATH: $CACHE_DIR/asciidoc-${ASCIIDOC_VERSION}"
-echo "       " `ls "$CACHE_DIR/asciidoc-${ASCIIDOC_VERSION}"`
 PYTHONPATH="$CACHE_DIR/asciidoc-${ASCIIDOC_VERSION}" \
   ASCIIDOC_PY="$CACHE_DIR/asciidoc-${ASCIIDOC_VERSION}/asciidoc.py" \
   PATH="$PATH:bin" \
