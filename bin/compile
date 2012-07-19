@@ -29,17 +29,19 @@ indent() {
   [ $(uname) == "Darwin" ] && sed -l "$RE" || sed -u "$RE"
 }
 
-if [ ! -f "$BUILD_DIR/bin/nginx" ]; then
+if [ ! -f "$CACHE_DIR/bin/nginx" ]; then
     echo "-----> Bundling nginx v$NGINX_VERSION"
     #curl --silent --max-time 60 --location $NGINX_URL | tar xz
     curl $NGINX_URL -s -o - | tar xzf - -C $VENDORED_NGINX
-    mkdir -p "$BUILD_DIR/bin"
-    cp "$VENDORED_NGINX/sbin/nginx" "$BUILD_DIR/bin/nginx"
+    mkdir -p "$CACHE_DIR/bin"
+    cp "$VENDORED_NGINX/sbin/nginx" "$CACHE_DIR/bin/nginx"
 fi
+mkdir -p "$BUILD_DIR/bin"
+cp "$CACHE_DIR/bin/nginx" "$BUILD_DIR/bin/nginx"
 
-if [ ! -f "$BUILD_DIR/asciidoc-$ASCIIDOC_VERSION" ]; then
+if [ ! -f "$CACHE_DIR/asciidoc-$ASCIIDOC_VERSION" ]; then
     echo "-----> Bundling asciidoc v$ASCIIDOC_VERSION"
-    curl $ASCIIDOC_URL -s -o - | tar xzf - -C "$BUILD_DIR"
+    curl $ASCIIDOC_URL -s -o - | tar xzf - -C "$CACHE_DIR"
 fi
 # install apache if needed
 #if [ ! -d $APACHE_PATH ]; then
@@ -128,9 +130,10 @@ mkdir -p $COMPILE_PATH
 # build the static site
 cd $BUILD_DIR
 
-export PYTHONPATH="$BUILD_DIR/asciidoc-${ASCIIDOC_VERSION}"
 echo "-----> Generating static content for deploy"
-PYTHONPATH="$BUILD_DIR/asciidoc-${ASCIIDOC_VERSION}" bin/pelican $BUILD_DIR/src -s $BUILD_DIR/pelican.conf.py -o $COMPILE_PATH
+echo "       PYTHONPATH: $CACHE_DIR/asciidoc-${ASCIIDOC_VERSION}"
+echo "       " `ls "$CACHE_DIR/asciidoc-${ASCIIDOC_VERSION}"`
+PYTHONPATH="$CACHE_DIR/asciidoc-${ASCIIDOC_VERSION}" bin/pelican $BUILD_DIR/src -s $BUILD_DIR/pelican.conf.py -o $COMPILE_PATH
 
 # repack cache
 #mkdir -p $CACHE_DIR
