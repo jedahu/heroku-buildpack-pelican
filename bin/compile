@@ -129,13 +129,8 @@ mkdir -p $COMPILE_PATH
 cd $BUILD_DIR
 
 export PYTHONPATH="$BUILD_PATH/asciidoc-${ASCIIDOC_VERSION}"
-if [ ! -d $BUILD_DIR/theme/templates ]; then
-  echo "-----> Generating static content for deploy with default theme"
-  bin/pelican $BUILD_DIR/src -s $BUILD_DIR/pelican.conf.py -o $COMPILE_PATH
-else
-  echo "-----> Generating static content for deploy with custom theme"
-  bin/pelican $BUILD_DIR/src -s $BUILD_DIR/pelican.conf.py -o $COMPILE_PATH -t $BUILD_DIR/theme
-fi
+echo "-----> Generating static content for deploy"
+PYTHONPATH="asciidoc-${ASCIIDOC_VERSION}" bin/pelican $BUILD_DIR/src -s $BUILD_DIR/pelican.conf.py -o $COMPILE_PATH
 
 # repack cache
 #mkdir -p $CACHE_DIR
